@@ -14,34 +14,27 @@ const socketServer = (app) => {
   // http.listen(3479, '0.0.0.0')
   console.log('\x1b[32m', `----  http://127.0.0.1:${3479}  ----`)
 
-  // let lawyerList = [{ lawyer: '张律师', uuid: '1234-4567'}, { lawyer: '刘律师', uuid: '8765-4321'}]
-  var lawyerList = []
+  let lawyerList = []
 
   io.sockets.on('connection', socket => {
     const USERCOUNT = 3;
-    socket.on('hi', (data) => {
-      console.log(data)
-    })
 
     socket.on('message', (room, data)=>{
-      socket.to(room).emit('message',room, data);
-      io.emit('message',room, data);
+      io.in(room).emit('message', room, data);
     });
 
     socket.on('setStatus', data => {
+      console.log('status ', data)
       const { status, lawyer, uuid } = data
+      setInterval(() => {
+        
+      }, 1e3);
       switch (status) {
         case 'free':
           lawyerList.findIndex(lawyer => lawyer.uuid === uuid) === -1 && lawyerList.push({ lawyer, uuid })
-          console.log(lawyerList, 'free')
           break;
-        case 'busy':
+        default:
           lawyerList.splice(lawyerList.findIndex(lawyer => lawyer.uuid === uuid), 1)
-          console.log(lawyerList, 'busy')
-          break;
-        case 'offline':
-          lawyerList.splice(lawyerList.findIndex(lawyer => lawyer.uuid === uuid), 1)
-          console.log(lawyerList, 'offline')
           break;
       }
     })
@@ -50,29 +43,32 @@ const socketServer = (app) => {
       console.log('lawyerList', lawyerList)
       io.emit('lawyerList', lawyerList)
     })
+
+    socket.on('clearLawyerList', () => {
+      lawyerList = []
+      console.log('clearLawyerList', lawyerList)
+      io.emit('reset')
+    })
   
     // 这里应该加锁
     socket.on('join', (room)=>{
-      console.log('join ---', room)
       socket.join(room);
       const myRoom = io.sockets.adapter.rooms.get(room);
       const users = myRoom? myRoom.size : 0;
-      console.debug('the user number of room is: ' + users);
+      console.debug(`房间, ${room}: ` + `人数, ${users}`, `Socket ID, ${socket.id}`);
   
       // 控制房间人数 USERCOUNT
       if(users < USERCOUNT){
-        io.emit('joined', room, socket.id); //发给除自己之外的房间内的所有人
+        socket.emit('joined', room, socket.id); //发给除自己之外的房间内的所有人
         console.log('joined', room, socket.id)
-        if(users === 1) {
-          console.log('wait join')
-          socket.to(room).emit('wait join', room, socket.id);
-          io.emit('wait join', room, socket.id);
+        if(users > 1) {
+          io.in(room).emit('otherJoin', room);
         }
       }else{
-        console.error('full', room, socket.id)
-        socket.leave(room).emit('full', room, socket.id);
-        io.emit('full', room, socket.id);
+        socket.leave(room)
+        socket.emit('full', room, socket.id);
       }
+
       //socket.emit('joined', room, socket.id); //发给自己
       //socket.broadcast.emit('joined', room, socket.id); //发给除自己之外的这个节点上的所有人
       //io.in(room).emit('joined', room, socket.id); //发给房间内的所有人
@@ -81,14 +77,9 @@ const socketServer = (app) => {
     socket.on('leave', (room)=>{
       const myRoom = io.sockets.adapter.rooms.get(room);
       const users = myRoom? myRoom.size : 0;
-      console.debug('the user number of room is: ' + (users-1));
-      //socket.emit('leaved', room, socket.id);
-      //socket.broadcast.emit('leaved', room, socket.id);
-      socket.to(room);
-      io.emit('bye', room, socket.id);
-      io.emit('leaved', room, socket.id);
-      console.debug('leaved', room, socket.id)
-      //io.in(room).emit('leaved', room, socket.id);
+      console.debug(`房间, ${room}: ` + `人数, ${users}`);
+      socket.leave(room)
+      io.in(room).emit('leaved', room, socket.id);
     });
   })
 
