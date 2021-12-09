@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webRTC JS Demo</title>
+  <link rel="stylesheet" href="./index.css" />
+</head>
+<body>
+  <h1>webRTC JS Demo -- by cy</h1>
+  <p class="p1">ITU-T G.114国际标准规定，延时超过150毫秒表示已经开始影响用户体验，用户可以容忍的最高延时是400毫秒</p>
+  <section class="section-1">
+    <video id="localVideo" autoplay playsinline></video>
+    <video id="remoteVideo" autoplay playsinline></video>
+  </section>
+
+  <section class="section-2">
+    <button onclick="p2pConnection()">连线</button>
+    <div class="line"></div>
+    <button class="hangUp" onclick="hangUp()">挂断</button>
+  </section>
+
+  <h5>性能监控 & 日志输出</h5>
+  <table id="table" border="1" cellspacing="0">
+    <tr>
+      <th>ICE TURN or STUN</th>
+      <th>Ping</th>
+      <th>Sent | Received</th>
+      <th>FPS | 丢帧 | 延时</th>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+  <div name="textarea" id="textarea" cols="100" rows="10"></div>
+
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <script src="./utils.js"></script>
+  <script src="./index.js"></script>
+</body>
+</html>
