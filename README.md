@@ -1,5 +1,6 @@
 # Introduction to the project
 这是一个 `p2p` 的视频服务完整 **demo**
+```
 .
 ├── server
 │   ├── html
@@ -8,6 +9,7 @@
 └── web
     ├── public
     └── src
+```
 包含信令服务和前端 `webRTC` 两个主要模块
 若要了解详细说明请点进对应目录查看
 
